@@ -1,0 +1,22 @@
+{
+  "name": "simpleweatherapi",
+  "version": "1.0.0",
+  "description": "Simple Weather API. CrossnoKaye - Full Stack Assignment.",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Frederick Fowles",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^4.6.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
+}
