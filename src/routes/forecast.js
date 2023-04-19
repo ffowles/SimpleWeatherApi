@@ -1,5 +1,5 @@
-import { Router } from "express";
-import { getForecast } from "../forecast/forecast.service.js";
+import { Router } from 'express'
+import forecastServiceFactory from '../forecast/forecast.service.js'
 
 /**
  * @swagger
@@ -56,24 +56,35 @@ import { getForecast } from "../forecast/forecast.service.js";
  *                 $ref: '#/components/schemas/Book'
  */
 
-export const router = Router();
+export const router = Router()
+
+const forecastService = forecastServiceFactory()
 
 const zipToLatLong = {
-  40509: "37.9924° N, 84.3752° W",
-};
+    40509: '37.9924° N, 84.3752° W',
+}
+
+const buildError = (message, status) => {
+    const error = new Error(message)
+    error.status = status
+    error.stack = false
+    return error
+}
 
 const validateForecastRequest = (request, response, next) => {
-  if (!request.query.zip) {
-    // invalid
-    const error = new Error("Zip is required!");
-    error.status = 400;
-    error.stack = false;
-    next(error);
-  } else {
-    // valid
-    next();
-  }
-};
-router.get("/forecast", validateForecastRequest, (request, response) =>
-  response.json(getForecast(request.query.zip))
-);
+    if (!request.query.zip) {
+        // invalid
+        next(buildError('Zip is required!', 400))
+    } else if (!zipToLatLong[request.query.zip]) {
+        // invalid
+        next(buildError('Provided zip is invalid or unsupported!', 404))
+    } else {
+        // valid
+        next()
+    }
+}
+
+router.get('/forecast', validateForecastRequest, async (request, response) => {
+    const forecast = await forecastService.getForecast(request.query.zip)
+    response.json(forecast)
+})
