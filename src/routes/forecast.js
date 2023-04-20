@@ -5,35 +5,45 @@ import forecastServiceFactory from '../forecast/forecast.service.js'
  * @swagger
  * components:
  *   schemas:
- *     Book:
+ *     Forecast:
  *       type: object
  *       required:
- *         - title
- *         - author
- *         - finished
+ *         - hour
+ *         - icon
+ *         - shortDescription
+ *         - temperature
+ *         - windSpeed
+ *         - windDirection
  *       properties:
- *         id:
- *           type: string
- *           description: The auto-generated id of the book
- *         title:
- *           type: string
- *           description: The title of your book
- *         author:
- *           type: string
- *           description: The book author
- *         finished:
- *           type: boolean
- *           description: Whether you have finished reading the book
- *         createdAt:
+ *         hour:
  *           type: string
  *           format: date
- *           description: The date the book was added
+ *           description: A date string indicating the hour the forecast is for
+ *         icon:
+ *           type: string
+ *           description: URL to a webhosted icon representing the weather
+ *         shortDescription:
+ *           type: string
+ *           description: Short description of the weather
+ *         temperature:
+ *           type: number
+ *           description: Expected temperature
+ *         temperatureUnit:
+ *           type: string
+ *           description: Unit of measure for the temperature
+ *         windSpeed:
+ *           type: string
+ *           description: Expected windspeed (includes the UOM)
+ *         windDirection:
+ *           type: string
+ *           description: Expected wind direction
  *       example:
- *         id: d5fE_asz
- *         title: The New Turing Omnibus
- *         author: Alexander K. Dewdney
- *         finished: false
- *         createdAt: 2020-03-10T04:05:06.157Z
+ *         hour: 2023-04-19T20:00:00-04:00
+ *         icon: https://api.weather.gov/icons/land/night/few,0?size=small
+ *         shortDescription: Mostly Clear
+ *         temperature: 74
+ *         windSpeed: 7 mph
+ *         windDirection: SW
  */
 
 /**
@@ -45,15 +55,27 @@ import forecastServiceFactory from '../forecast/forecast.service.js'
  *   get:
  *     summary: Provide a weather forecast for the provided zip code
  *     tags: [Forecast]
+ *     parameters:
+ *       - in: query
+ *         name: zip
+ *         schema:
+ *           type: string
+ *         required: true
+ *       - in: query
+ *         name: units
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Use 'us' for imperial and 'si' for metric
  *     responses:
  *       200:
- *         description: The list of the books
+ *         description: A list of forecasts for the given zip code
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Book'
+ *                 $ref: '#/components/schemas/Forecast'
  */
 
 export const router = Router()
@@ -85,6 +107,8 @@ const validateForecastRequest = (request, response, next) => {
 }
 
 router.get('/forecast', validateForecastRequest, async (request, response) => {
-    const forecast = await forecastService.getForecast(request.query.zip)
+    const zip = request.query.zip
+    const units = request.query.units || 'us'
+    const forecast = await forecastService.getForecast(zip, units)
     response.json(forecast)
 })

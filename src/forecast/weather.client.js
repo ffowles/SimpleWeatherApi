@@ -29,10 +29,16 @@ export default function weatherClientFactory() {
         }
     }
 
-    client.getForecast = async function (gridPoints) {
-        const url = `https://${hostname}/gridpoints/${gridPoints.gridId}/${gridPoints.gridX},${gridPoints.gridY}`
-        const response = await axios.get(url, options)
-        return response.data
+    client.getForecast = async function (gridPoints, units) {
+        const url = `https://${hostname}/gridpoints/${gridPoints.gridId}/${gridPoints.gridX},${gridPoints.gridY}/forecast/hourly`
+        const optionsWithUnits = {
+            ...options,
+            params: {
+                units,
+            },
+        }
+        const response = await axios.get(url, optionsWithUnits)
+        return response.data.properties
     }
 
     return client

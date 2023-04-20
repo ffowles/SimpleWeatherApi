@@ -5,12 +5,11 @@ export default function forecastServiceFactory() {
 
     const weatherClient = weatherClientFactory()
 
-    service.getForecast = async function (zip) {
+    service.getForecast = async function (zip, units) {
         const coordinates = 'test' // await getCoordinates(zip);
         const gridPoints = await weatherClient.getGridPoints(37.9924, -84.3752)
-        const forecast = await weatherClient.getForecast(gridPoints)
-        console.log(forecast)
-        return forecast
+        const weatherForecast = await weatherClient.getForecast(gridPoints, units)
+        return weatherForecast
     }
 
     return service
