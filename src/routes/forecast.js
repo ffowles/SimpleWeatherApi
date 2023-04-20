@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { buildResponseError } from '../util.js'
 import forecastServiceFactory from '../forecast/forecast.service.js'
 
 /**
@@ -83,31 +84,24 @@ export const router = Router()
 
 const forecastService = forecastServiceFactory()
 
-const zipToLatLong = {
-    40509: '37.9924° N, 84.3752° W',
-}
-
-const buildError = (message, status) => {
-    const error = new Error(message)
-    error.status = status
-    error.stack = false
-    return error
-}
-
 const validateForecastRequest = (request, response, next) => {
     if (!request.query.zip) {
         // invalid
-        next(buildError('Zip is required!', 400))
-    } else if (!zipToLatLong[request.query.zip]) {
+        next(buildResponseError('Zip is required!', 400))
+    } else if (
+        request.query.zip.length > 5 ||
+        request.query.zip.length < 5 ||
+        parseInt(request.query.zip) != request.query.zip
+    ) {
         // invalid
-        next(buildError('Provided zip is invalid or unsupported!', 404))
+        next(buildResponseError('Invalid zip!', 400))
     } else if (
         request.query.units &&
         request.query.units !== 'us' &&
         request.query.units !== 'si'
     ) {
         // invalid
-        next(buildError('Unsupported units provided! Please use us or si.', 400))
+        next(buildResponseError('Unsupported units provided! Please use us or si.', 400))
     } else {
         // valid
         next()
@@ -116,9 +110,11 @@ const validateForecastRequest = (request, response, next) => {
 
 // Configure endpoint
 
-router.get('/forecast', validateForecastRequest, async (request, response) => {
+router.get('/forecast', validateForecastRequest, async (request, response, next) => {
     const zip = request.query.zip
     const units = request.query.units || 'us'
-    const forecast = await forecastService.getForecast(zip, units)
-    response.json(forecast)
+    forecastService
+        .getForecast(zip, units)
+        .then((forecast) => response.json(forecast))
+        .catch((e) => next(e))
 })

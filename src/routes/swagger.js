@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
-import pkg from '../../package.json' assert { type: 'json' }
+import pkgJson from '../../package.json' assert { type: 'json' }
 
 /**
  * Configure API documentation endpoint. The documentation details will be provided at each endpoint definition.
@@ -13,11 +13,11 @@ const options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: pkg.name,
-            version: pkg.version,
-            description: pkg.description,
+            title: pkgJson.name,
+            version: pkgJson.version,
+            description: pkgJson.description,
             contact: {
-                name: pkg.author,
+                name: pkgJson.author,
             },
         },
         servers: [

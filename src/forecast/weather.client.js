@@ -7,26 +7,30 @@ import axios from 'axios'
  *  - https://api.weather.gov/gridpoints/LMK/99,70/forecast
  */
 
+const hostname = 'api.weather.gov'
+
+const options = {
+    headers: {
+        'User-Agent': '(freddy.f@live.com)',
+    },
+}
+
 export default function weatherClientFactory() {
     const client = {}
 
-    const options = {
-        headers: {
-            'User-Agent': '(freddy.f@live.com)',
-        },
-    }
-
-    const hostname = 'api.weather.gov'
-
-    client.getGridPoints = async function (lat, long) {
-        const url = `https://${hostname}/points/${lat},${long}`
-        const response = await axios.get(url, options)
-        const properties = response.data.properties
-        return {
-            gridId: properties.gridId,
-            gridX: properties.gridX,
-            gridY: properties.gridY,
-        }
+    client.getGridPoints = async function (coordinates) {
+        const url = `https://${hostname}/points/${coordinates.lat},${coordinates.long}`
+        return axios
+            .get(url, options)
+            .then((response) => {
+                const properties = response.data.properties
+                return {
+                    gridId: properties.gridId,
+                    gridX: properties.gridX,
+                    gridY: properties.gridY,
+                }
+            })
+            .catch((e) => console.error(e))
     }
 
     client.getForecast = async function (gridPoints, units) {
@@ -37,8 +41,10 @@ export default function weatherClientFactory() {
                 units,
             },
         }
-        const response = await axios.get(url, optionsWithUnits)
-        return response.data.properties
+        return axios
+            .get(url, optionsWithUnits)
+            .then((response) => response.data.properties)
+            .catch((e) => console.error(e))
     }
 
     return client
