@@ -2,7 +2,7 @@ import express from 'express'
 import { router as forecastRouter } from './routes/forecast.js'
 import { router as swaggerRouter } from './routes/swagger.js'
 
-const port = 3000
+const port = 3001
 
 const app = express()
 
