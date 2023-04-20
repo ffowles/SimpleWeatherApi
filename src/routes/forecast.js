@@ -12,6 +12,7 @@ import forecastServiceFactory from '../forecast/forecast.service.js'
  *         - icon
  *         - shortDescription
  *         - temperature
+ *         - temperatureUnit
  *         - windSpeed
  *         - windDirection
  *       properties:
@@ -100,11 +101,20 @@ const validateForecastRequest = (request, response, next) => {
     } else if (!zipToLatLong[request.query.zip]) {
         // invalid
         next(buildError('Provided zip is invalid or unsupported!', 404))
+    } else if (
+        request.query.units &&
+        request.query.units !== 'us' &&
+        request.query.units !== 'si'
+    ) {
+        // invalid
+        next(buildError('Unsupported units provided! Please use us or si.', 400))
     } else {
         // valid
         next()
     }
 }
+
+// Configure endpoint
 
 router.get('/forecast', validateForecastRequest, async (request, response) => {
     const zip = request.query.zip
