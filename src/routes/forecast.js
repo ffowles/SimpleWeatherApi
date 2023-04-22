@@ -67,6 +67,7 @@ import { buildResponseError } from '../util.js'
  *         name: units
  *         schema:
  *           type: string
+ *           default: us
  *         required: false
  *         description: Use 'us' for imperial and 'si' for metric
  *     responses:
