@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { buildResponseError } from '../util.js'
 import forecastServiceFactory from '../forecast/forecast.service.js'
+import { buildResponseError } from '../util.js'
 
 /**
  * @swagger
@@ -112,9 +112,18 @@ const validateForecastRequest = (request, response, next) => {
 
 router.get('/forecast', validateForecastRequest, async (request, response, next) => {
     const zip = request.query.zip
-    const units = request.query.units || 'us'
+    const units = request.query.units || 'us' // default to 'us' if units are not provided
     forecastService
         .getForecast(zip, units)
-        .then((forecast) => response.json(forecast))
+        .then((forecast) => {
+            const responseBody = {
+                meta: {
+                    status: 200,
+                    message: 'OK',
+                },
+                data: forecast,
+            }
+            return response.json(responseBody)
+        })
         .catch((e) => next(e))
 })

@@ -9,6 +9,7 @@ import axios from 'axios'
 
 const hostname = 'api.weather.gov'
 
+// The weather service requires a "User-Agent" header
 const options = {
     headers: {
         'User-Agent': '(freddy.f@live.com)',
