@@ -12,6 +12,8 @@ const corsOptions = {
     optionSuccessStatus: 200,
 }
 
+// TODO: add tests
+
 app.use(cors(corsOptions), swaggerRouter, forecastRouter)
 
 app.listen(port, () =>

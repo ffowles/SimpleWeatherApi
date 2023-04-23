@@ -62,17 +62,8 @@ import { buildResponseError } from '../util.js'
  *         name: zip
  *         schema:
  *           type: string
- *         description: Zip code for the forecast. This is required if lat & long are not provided.
- *       - in: query
- *         name: lat
- *         schema:
- *           type: string
- *         description: Latitude for the forecast. This is required if zip is not provided.
- *       - in: query
- *         name: long
- *         schema:
- *           type: string
- *         description: Longitude for the forecast. This is required if zip is not provided.
+ *         required: true
+ *         description: Zip code for the forecast.
  *       - in: query
  *         name: units
  *         schema:
@@ -96,13 +87,14 @@ export const router = Router()
 const forecastService = forecastServiceFactory()
 
 const validateForecastRequest = (request, response, next) => {
-    if (!request.query.zip && (!request.query.lat || !request.query.long)) {
+    if (!request.query.zip) {
         // invalid
-        next(buildResponseError('A zip or coordinates are required!', 400))
+        next(buildResponseError('Zip is required!', 400))
     } else if (
-        request.query.zip.length > 5 ||
-        request.query.zip.length < 5 ||
-        parseInt(request.query.zip) != request.query.zip
+        request.query.zip &&
+        (request.query.zip.length > 5 ||
+            request.query.zip.length < 5 ||
+            parseInt(request.query.zip) != request.query.zip)
     ) {
         // invalid
         next(buildResponseError('Invalid zip!', 400))
@@ -123,10 +115,9 @@ const validateForecastRequest = (request, response, next) => {
 
 router.get('/forecast', validateForecastRequest, async (request, response, next) => {
     const zip = request.query.zip
-    const coordinates = { lat: request.query.lat, long: request.query.long }
     const units = request.query.units || 'us' // default to 'us' if units are not provided
     forecastService
-        .getForecast(zip, coordinates, units)
+        .getForecast(zip, units)
         .then((forecast) => response.json(forecast))
         .catch((e) => next(e))
 })

@@ -16,14 +16,12 @@ export default function forecastServiceFactory() {
      * @param {*} units
      * @returns Array of forecast data
      */
-    service.getForecast = async function (zip, coordinates, units) {
-        if (!coordinates.lat || !coordinates.long) {
-            // Get lat / long
-            coordinates = await geocodeClient.getCoordinates(zip)
-            if (!coordinates) {
-                const message = `Unable to determine coordinates for zip: ${zip}`
-                throw buildResponseError(message, 404)
-            }
+    service.getForecast = async function (zip, units) {
+        // Get lat / long
+        coordinates = await geocodeClient.getCoordinates(zip)
+        if (!coordinates) {
+            const message = `Unable to determine coordinates for zip: ${zip}`
+            throw buildResponseError(message, 404)
         }
         // Use lat / long to determine the grid points the weather client requires
         const gridPoints = await weatherClient.getGridPoints(coordinates)
