@@ -18,7 +18,7 @@ export default function forecastServiceFactory() {
      */
     service.getForecast = async function (zip, units) {
         // Get lat / long
-        coordinates = await geocodeClient.getCoordinates(zip)
+        const coordinates = await geocodeClient.getCoordinates(zip)
         if (!coordinates) {
             const message = `Unable to determine coordinates for zip: ${zip}`
             throw buildResponseError(message, 404)
