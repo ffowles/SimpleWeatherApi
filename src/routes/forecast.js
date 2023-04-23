@@ -52,7 +52,7 @@ import { buildResponseError } from '../util.js'
  * @swagger
  * tags:
  *   name: Forecast
- *   description: A simple weather forecast API
+ *   description: A simple weather forecast API.
  * /forecast:
  *   get:
  *     summary: Provide a weather forecast for the provided zip code
@@ -62,14 +62,24 @@ import { buildResponseError } from '../util.js'
  *         name: zip
  *         schema:
  *           type: string
- *         required: true
+ *         description: Zip code for the forecast. This is required if lat & long are not provided.
+ *       - in: query
+ *         name: lat
+ *         schema:
+ *           type: string
+ *         description: Latitude for the forecast. This is required if zip is not provided.
+ *       - in: query
+ *         name: long
+ *         schema:
+ *           type: string
+ *         description: Longitude for the forecast. This is required if zip is not provided.
  *       - in: query
  *         name: units
  *         schema:
  *           type: string
  *           default: us
  *         required: false
- *         description: Use 'us' for imperial and 'si' for metric
+ *         description: Use 'us' for imperial and 'si' for metric.
  *     responses:
  *       200:
  *         description: A list of forecasts for the given zip code
@@ -86,9 +96,9 @@ export const router = Router()
 const forecastService = forecastServiceFactory()
 
 const validateForecastRequest = (request, response, next) => {
-    if (!request.query.zip) {
+    if (!request.query.zip && (!request.query.lat || !request.query.long)) {
         // invalid
-        next(buildResponseError('Zip is required!', 400))
+        next(buildResponseError('A zip or coordinates are required!', 400))
     } else if (
         request.query.zip.length > 5 ||
         request.query.zip.length < 5 ||
@@ -113,18 +123,10 @@ const validateForecastRequest = (request, response, next) => {
 
 router.get('/forecast', validateForecastRequest, async (request, response, next) => {
     const zip = request.query.zip
+    const coordinates = { lat: request.query.lat, long: request.query.long }
     const units = request.query.units || 'us' // default to 'us' if units are not provided
     forecastService
-        .getForecast(zip, units)
-        .then((forecast) => {
-            const responseBody = {
-                meta: {
-                    status: 200,
-                    message: 'OK',
-                },
-                data: forecast,
-            }
-            return response.json(responseBody)
-        })
+        .getForecast(zip, coordinates, units)
+        .then((forecast) => response.json(forecast))
         .catch((e) => next(e))
 })
